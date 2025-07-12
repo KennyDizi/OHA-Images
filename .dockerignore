@@ -1,0 +1,25 @@
+# From .gitignore
+__pycache__/
+*.py[codz]
+*.so
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env*
+venv/
+.venv/
+docs/
+
+# Docker and Build specific
+Dockerfile
+.dockerignore
+*.md
+.git
+.github
+.vscode
+*~
+*.log
+*.tar.gz
