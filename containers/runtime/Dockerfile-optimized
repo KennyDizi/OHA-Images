@@ -11,7 +11,8 @@ ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     OPENVSCODE_SERVER_ROOT=/openhands/.openvscode-server \
-    PATH="/openhands/micromamba/bin:/openhands/bin:${PATH}"
+    PATH="/openhands/micromamba/bin:/openhands/bin:${PATH}" \
+    PLAYWRIGHT_BROWSERS_PATH=/openhands/playwright_browsers
 
 # 1. Install build-time system dependencies and create base directories.
 #    Includes build-essential, wget, curl which are NOT needed in the final image.
@@ -81,7 +82,8 @@ ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
     VISUAL=code \
     GIT_EDITOR="code --wait" \
     OPENVSCODE_SERVER_ROOT=/openhands/.openvscode-server \
-    PATH="/openhands/micromamba/bin:/openhands/.openvscode-server/bin/remote-cli:${PATH}"
+    PATH="/openhands/micromamba/bin:/openhands/.openvscode-server/bin/remote-cli:${PATH}" \
+    PLAYWRIGHT_BROWSERS_PATH=/openhands/playwright_browsers
 
 # 1. Install ONLY runtime system dependencies.
 RUN apt-get update && \
