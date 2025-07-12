@@ -40,7 +40,7 @@ RUN \
     micromamba run -n openhands poetry config virtualenvs.path /openhands/poetry && \
     micromamba run -n openhands poetry env use python3.13 && \
     # Regenerate lock file to ensure it's correct and prevent build failures.
-    micromamba run -n openhands poetry lock --no-update && \
+    micromamba run -n openhands poetry lock && \
     # Install dependencies
     micromamba run -n openhands poetry install --only main,runtime --no-interaction --no-root && \
     # Clean poetry cache to reduce layer size
