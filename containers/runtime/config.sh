@@ -1,0 +1,3 @@
+
+DOCKER_IMAGE_TAG=oh_v0.49.0_image_nikolaik_s_python-nodejs_tag_python3.13-nodejs24
+DOCKER_IMAGE_SOURCE_TAG=oh_v0.49.0_88a4q97upv84ltek_5hhycckyiqlcookw
