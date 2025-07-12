@@ -9,6 +9,7 @@ echo "INFO: Preparing Docker build context..."
 # 1. Define Docker image name and build context path
 IMAGE_NAME="all-hands-ai/runtime"
 CONTEXT_PATH="containers/runtime"
+RELEASE_TAG="latest"
 
 # 2. Build the Docker image
 # The -f flag specifies the Dockerfile-optimized location.
