@@ -1,0 +1,107 @@
+# ===================================================================
+# Stage 1: Builder
+# This stage installs build tools, downloads assets, and compiles all
+# dependencies. Artifacts will be copied to the final stage.
+# ===================================================================
+FROM nikolaik/python-nodejs:python3.13-nodejs24 AS builder
+
+# Shared environment variables
+ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
+    MAMBA_ROOT_PREFIX=/openhands/micromamba \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    OPENVSCODE_SERVER_ROOT=/openhands/.openvscode-server \
+    PATH="/openhands/micromamba/bin:/openhands/bin:${PATH}"
+
+# 1. Install build-time system dependencies and create base directories.
+#    Includes build-essential, wget, curl which are NOT needed in the final image.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget curl ca-certificates sudo apt-utils git jq build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Install uv for faster package management (if needed by other tools)
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/openhands/bin" sh && \
+    # Create directories
+    mkdir -p /openhands/logs /openhands/poetry /openhands/workspace /openhands/code/openhands && \
+    touch /openhands/code/openhands/__init__.py
+
+# 2. Install micromamba and the 'openhands' Python environment.
+RUN PREFIX_LOCATION=${MAMBA_ROOT_PREFIX} BIN_FOLDER=${MAMBA_ROOT_PREFIX}/bin INIT_YES=no CONDA_FORGE_YES=yes bash -c "$(curl -L https://micro.mamba.pm/install.sh)" && \
+    micromamba config remove channels defaults && \
+    micromamba create -n openhands -c conda-forge poetry python=3.13 -y
+
+# 3. Install Python dependencies using Poetry for better caching.
+#    Only copy pyproject.toml first to leverage Docker layer caching.
+COPY ./code/pyproject.toml /openhands/code/
+WORKDIR /openhands/code
+RUN \
+    micromamba config set changeps1 False && \
+    micromamba run -n openhands poetry config virtualenvs.path /openhands/poetry && \
+    micromamba run -n openhands poetry env use python3.13 && \
+    # Regenerate lock file to ensure it's correct and prevent build failures.
+    micromamba run -n openhands poetry lock --no-update && \
+    # Install dependencies
+    micromamba run -n openhands poetry install --only main,runtime --no-interaction --no-root && \
+    # Clean poetry cache to reduce layer size
+    micromamba run -n openhands poetry cache clear --all . -n
+
+# 4. Install Playwright browsers and VSCode Server.
+ARG RELEASE_TAG="openvscode-server-v1.98.2"
+ARG RELEASE_ORG="gitpod-io"
+RUN \
+    # Install playwright and its heavy browser dependencies
+    micromamba run -n openhands poetry run playwright install --with-deps chromium && \
+    # Download and extract VSCode Server
+    if [ -z "${RELEASE_TAG}" ]; then echo "RELEASE_TAG must be set" >&2 && exit 1; fi && \
+    arch=$(uname -m) && \
+    if [ "${arch}" = "x86_64" ]; then arch="x64"; elif [ "${arch}" = "aarch64" ]; then arch="arm64"; fi && \
+    wget -q https://github.com/${RELEASE_ORG}/openvscode-server/releases/download/${RELEASE_TAG}/${RELEASE_TAG}-linux-${arch}.tar.gz -O vscode.tar.gz && \
+    tar -xzf vscode.tar.gz && \
+    mv ${RELEASE_TAG}-linux-${arch} ${OPENVSCODE_SERVER_ROOT} && \
+    cp ${OPENVSCODE_SERVER_ROOT}/bin/remote-cli/openvscode-server ${OPENVSCODE_SERVER_ROOT}/bin/remote-cli/code && \
+    rm vscode.tar.gz
+
+# 5. Capture the dynamic interpreter path for the final image.
+RUN micromamba run -n openhands poetry run python -c "import sys; print('OH_INTERPRETER_PATH=' + sys.executable)" >> /etc/environment
+
+# ===================================================================
+# Stage 2: Final Image
+# This stage is optimized for size. It only includes runtime artifacts
+# copied from the builder stage.
+# ===================================================================
+FROM nikolaik/python-nodejs:python3.13-nodejs24
+
+# Set environment variables (not inherited from builder)
+ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
+    MAMBA_ROOT_PREFIX=/openhands/micromamba \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    EDITOR=code \
+    VISUAL=code \
+    GIT_EDITOR="code --wait" \
+    OPENVSCODE_SERVER_ROOT=/openhands/.openvscode-server \
+    PATH="/openhands/micromamba/bin:/openhands/.openvscode-server/bin/remote-cli:${PATH}"
+
+# 1. Install ONLY runtime system dependencies.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        sudo git jq tmux ripgrep ffmpeg \
+        libgl1-mesa-glx libasound2-plugins libatomic1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 2. Create users and directories, set permissions.
+RUN (if getent passwd 1000 | grep -q pn; then userdel pn; fi) && \
+    (if getent passwd 1000 | grep -q ubuntu; then userdel ubuntu; fi) && \
+    mkdir -p /openhands/logs /openhands/workspace && \
+    chmod -R g+rws,o+rw /openhands/workspace
+
+# 3. Copy ALL necessary application artifacts from the builder stage.
+COPY --from=builder /openhands /openhands/
+COPY --from=builder /etc/environment /etc/environment
+
+# 4. Copy project source code AS the final step to optimize caching.
+WORKDIR /openhands/code
+COPY ./code/openhands /openhands/code/openhands
+RUN chmod a+rwx /openhands/code/openhands/__init__.py
