@@ -3,14 +3,13 @@
 # This stage installs build tools, downloads assets, and compiles all
 # dependencies. Artifacts will be copied to the final stage.
 # ===================================================================
-FROM nikolaik/python-nodejs:python3.13-nodejs22 AS builder
+FROM nikolaik/python-nodejs:python3.13-nodejs22-slim AS builder
 
 # Shared environment variables
 ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
     MAMBA_ROOT_PREFIX=/openhands/micromamba \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    OPENVSCODE_SERVER_ROOT=/openhands/.openvscode-server \
     PATH="/openhands/micromamba/bin:/openhands/bin:${PATH}" \
     PLAYWRIGHT_BROWSERS_PATH=/openhands/playwright_browsers
 
@@ -47,21 +46,8 @@ RUN \
     # Clean poetry cache to reduce layer size
     micromamba run -n openhands poetry cache clear --all . -n
 
-# 4. Install Playwright browsers and VSCode Server.
-ARG RELEASE_TAG="openvscode-server-v1.98.2"
-ARG RELEASE_ORG="gitpod-io"
-RUN \
-    # Install playwright and its heavy browser dependencies
-    micromamba run -n openhands poetry run playwright install --with-deps chromium && \
-    # Download and extract VSCode Server
-    if [ -z "${RELEASE_TAG}" ]; then echo "RELEASE_TAG must be set" >&2 && exit 1; fi && \
-    arch=$(uname -m) && \
-    if [ "${arch}" = "x86_64" ]; then arch="x64"; elif [ "${arch}" = "aarch64" ]; then arch="arm64"; fi && \
-    wget -q https://github.com/${RELEASE_ORG}/openvscode-server/releases/download/${RELEASE_TAG}/${RELEASE_TAG}-linux-${arch}.tar.gz -O vscode.tar.gz && \
-    tar -xzf vscode.tar.gz && \
-    mv ${RELEASE_TAG}-linux-${arch} ${OPENVSCODE_SERVER_ROOT} && \
-    cp ${OPENVSCODE_SERVER_ROOT}/bin/remote-cli/openvscode-server ${OPENVSCODE_SERVER_ROOT}/bin/remote-cli/code && \
-    rm vscode.tar.gz
+# 4. Install Playwright browsers.
+RUN micromamba run -n openhands poetry run playwright install --with-deps chromium
 
 # 5. Capture the dynamic interpreter path for the final image.
 RUN micromamba run -n openhands poetry run python -c "import sys; print('OH_INTERPRETER_PATH=' + sys.executable)" >> /etc/environment
@@ -71,18 +57,14 @@ RUN micromamba run -n openhands poetry run python -c "import sys; print('OH_INTE
 # This stage is optimized for size. It only includes runtime artifacts
 # copied from the builder stage.
 # ===================================================================
-FROM nikolaik/python-nodejs:python3.13-nodejs22
+FROM nikolaik/python-nodejs:python3.13-nodejs22-slim
 
 # Set environment variables (not inherited from builder)
 ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
     MAMBA_ROOT_PREFIX=/openhands/micromamba \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    EDITOR=code \
-    VISUAL=code \
-    GIT_EDITOR="code --wait" \
-    OPENVSCODE_SERVER_ROOT=/openhands/.openvscode-server \
-    PATH="/openhands/micromamba/bin:/openhands/.openvscode-server/bin/remote-cli:${PATH}" \
+    PATH="/openhands/micromamba/bin:${PATH}" \
     PLAYWRIGHT_BROWSERS_PATH=/openhands/playwright_browsers
 
 # 1. Install ONLY runtime system dependencies. This includes a comprehensive
