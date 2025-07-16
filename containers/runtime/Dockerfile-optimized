@@ -3,7 +3,7 @@
 # This stage installs build tools, downloads assets, and compiles all
 # dependencies. Artifacts will be copied to the final stage.
 # ===================================================================
-FROM nikolaik/python-nodejs:python3.13-nodejs22-slim AS builder
+FROM nikolaik/python-nodejs:python3.13-nodejs24-slim AS builder
 
 # Shared environment variables
 ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
@@ -57,7 +57,7 @@ RUN micromamba run -n openhands poetry run python -c "import sys; print('OH_INTE
 # This stage is optimized for size. It only includes runtime artifacts
 # copied from the builder stage.
 # ===================================================================
-FROM nikolaik/python-nodejs:python3.13-nodejs22-slim
+FROM nikolaik/python-nodejs:python3.13-nodejs24-slim
 
 # Set environment variables (not inherited from builder)
 ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
