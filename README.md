@@ -40,7 +40,7 @@ Build and register a local Docker image for the optimized sandbox runtime:
 ## What Each Script Does
 
 - **`pull-latest-sandbox-runtime.sh`**: Downloads the latest code and dependencies for the sandbox runtime
-- **`build-sandbox-runtime.sh`**: Creates the runtime Docker image using the base image `nikolaik/python-nodejs:python3.13-nodejs24`
+- **`build-sandbox-runtime.sh`**: Creates the runtime Docker image using the base image `nikolaik/python-nodejs:python3.13-nodejs24-slim`
 - **`start-optimized-sandbox-runtime.sh`**: Builds and registers a local Docker image named `all-hands-ai/runtime` using the optimized Dockerfile
 
 ## Prerequisites
