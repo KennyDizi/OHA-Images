@@ -1,0 +1,29 @@
+[core]
+search_api_key = "tvly-***"
+
+[llm]
+api_key = "sk-proj-***"
+# API base URL (For Headless / CLI only -  In Web this is overridden by Session Init)
+#base_url = ""
+provider = "openai" # Can be openai, anthropic, deepseek, openrouter
+# Model to use. (For Headless / CLI only -  In Web this is overridden by Session Init)
+model = "openai/o3"
+reasoning_effort = "high"
+
+[agent]
+
+# Enable the browser environment
+enable_browser = true
+
+# Whether the browsing tool is enabled
+# Note: when this is set to true, enable_browser in the core config must also be true
+enable_browsing = true
+
+enable_cmd = true
+
+# Whether the stream command tool is enabled
+# Only has an effect if enable_cmd is False
+enable_stream_cmd = true
+
+[sandbox]
+platform = "linux/amd64" # Can be linux/amd64 or linux/arm64
