@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.13-nodejs22
+FROM nikolaik/python-nodejs:python3.13-nodejs24-slim
 
 # Shared environment variables
 ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
@@ -68,7 +68,7 @@ RUN mkdir -p /openhands/micromamba/bin && \
 
 # Create the openhands virtual environment and install poetry and python
 RUN /openhands/micromamba/bin/micromamba create -n openhands -y && \
-    /openhands/micromamba/bin/micromamba install -n openhands -c conda-forge poetry python=3.13 -y
+    /openhands/micromamba/bin/micromamba install -n openhands -c conda-forge poetry python=3.12 -y
 
 # Create a clean openhands directory including only the pyproject.toml, poetry.lock and openhands/__init__.py
 RUN \
@@ -85,7 +85,7 @@ WORKDIR /openhands/code
 RUN \
     /openhands/micromamba/bin/micromamba config set changeps1 False && \
     /openhands/micromamba/bin/micromamba run -n openhands poetry config virtualenvs.path /openhands/poetry && \
-    /openhands/micromamba/bin/micromamba run -n openhands poetry env use python3.13 && \
+    /openhands/micromamba/bin/micromamba run -n openhands poetry env use python3.12 && \
     # Install project dependencies
     /openhands/micromamba/bin/micromamba run -n openhands poetry install --only main,runtime --no-interaction --no-root && \
     # Update and install additional tools
