@@ -13,23 +13,7 @@ git clone <repository-url>
 cd OHA-Images
 ```
 
-### 2. Pull the Latest Sandbox Runtime
-
-Pull the latest code and dependencies:
-
-```bash
-./pull-latest-sandbox-runtime.sh
-```
-
-### 3. Build the Runtime Docker Image
-
-Build the runtime sandbox Docker image:
-
-```bash
-./build-sandbox-runtime.sh
-```
-
-### 4. Start the Optimized Sandbox Runtime
+### 2. Start To Build And Register The Optimized Sandbox Runtime Image
 
 Build and register a local Docker image for the optimized sandbox runtime:
 
