@@ -10,11 +10,12 @@ echo "INFO: Preparing Docker build context..."
 IMAGE_NAME="all-hands-ai/runtime"
 CONTEXT_PATH="containers/runtime"
 RELEASE_TAG="latest"
+DOCKER_FILE_NAME="Dockerfile-optimized"
 
 # 2. Build the Docker image
 # The -f flag specifies the Dockerfile-optimized location.
 # The last argument specifies the build context path.
 echo "INFO: Building Docker image: ${IMAGE_NAME}"
-docker build -t "${IMAGE_NAME}" -f "${CONTEXT_PATH}/Dockerfile-optimized" "${CONTEXT_PATH}"
+docker build -t "${IMAGE_NAME}" -f "${CONTEXT_PATH}/${DOCKER_FILE_NAME}" "${CONTEXT_PATH}"
 
-echo "INFO: Docker image ${IMAGE_NAME} built successfully."
+echo "INFO: Docker image ${IMAGE_NAME}:${RELEASE_TAG} has been built successfully."
