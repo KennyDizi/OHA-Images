@@ -7,7 +7,7 @@ api_key = "sk-proj-***"
 #base_url = ""
 provider = "openai" # Can be openai, anthropic, deepseek, openrouter
 # Model to use. (For Headless / CLI only -  In Web this is overridden by Session Init)
-model = "openai/o3"
+model = "o3"
 reasoning_effort = "high"
 
 [agent]
