@@ -25,7 +25,7 @@ build = "build_vscode.py" # Build VSCode extension during Poetry build
 
 [tool.poetry.dependencies]
 python = "^3.13,<3.14"
-litellm = "^1.74.4" # avoid 1.64.4 (known bug) & 1.67.* (known bug #10272)
+litellm = "^1.74.7" # avoid 1.64.4 (known bug) & 1.67.* (known bug #10272)
 aiohttp = ">=3.9.0,!=3.11.13"           # Pin to avoid yanked version 3.11.13
 google-generativeai = "*"               # To use litellm with Gemini Pro API
 google-api-python-client = "^2.164.0"   # For Google Sheets API
@@ -81,6 +81,8 @@ python-pptx = "*"
 pylatexenc = "*"
 python-docx = "*"
 bashlex = "^0.18"
+yarl = "^1.20.1"
+tree-sitter-language-pack = "^0.7.3"
 
 # TODO: These are integrations that should probably be optional
 redis = ">=5.2,<7.0"
