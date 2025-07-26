@@ -111,7 +111,7 @@ if [ -f .env ]; then
         --add-host host.docker.internal:host-gateway \
         --network oha-cli-network \
         --name "${CONTAINER_NAME}" \
-        docker.all-hands.dev/all-hands-ai/openhands:0.49.1 \
+        docker.all-hands.dev/all-hands-ai/openhands:0.50.0 \
         python3 -m openhands.cli.main --override-cli-mode true
 else
     echo "Error: .env file not found"
