@@ -41,6 +41,7 @@ numpy = "*"
 json-repair = "*"
 browsergym-core = "0.13.3"              # integrate browsergym-core as the browsing interface
 html2text = "*"
+tokenizers = "0.21.2"
 
 
 pexpect = "*"
