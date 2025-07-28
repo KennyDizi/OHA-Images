@@ -88,6 +88,9 @@ FUNCTION_CALLING_SUPPORTED_MODELS = [
     'gpt-4.1',
     'kimi-k2-0711-preview',
     'kimi-k2-instruct',
+    'Qwen3-Coder-480B-A35B-Instruct',
+    'qwen/qwen3-coder',
+    'qwen/qwen3-235b-a22b-thinking-2507'
 ]
 
 REASONING_EFFORT_SUPPORTED_MODELS = [
