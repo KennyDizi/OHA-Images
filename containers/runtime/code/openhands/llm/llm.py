@@ -104,6 +104,7 @@ REASONING_EFFORT_SUPPORTED_MODELS = [
     'o4-mini-2025-04-16',
     'gemini-2.5-flash',
     'gemini-2.5-pro',
+    'qwen/qwen3-235b-a22b-thinking-2507'
 ]
 
 MODELS_WITHOUT_STOP_WORDS = [
