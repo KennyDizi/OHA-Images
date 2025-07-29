@@ -1,2 +1,2 @@
 DOCKER_IMAGE_TAG=oh_v0.50.0_image_nikolaik_s_python-nodejs_tag_python3.13-nodejs24-slim
-DOCKER_IMAGE_SOURCE_TAG=oh_v0.50.0_iy67eg4gz95n65ui_xtnv54jzbjrlckf4
+DOCKER_IMAGE_SOURCE_TAG=oh_v0.50.0_wen3wtw65bb5l95y_n7h037b3oao9crmb
