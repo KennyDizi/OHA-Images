@@ -15,6 +15,24 @@ if [ -f .env ]; then
         LLM_REASONING_EFFORT_ARG="-e LLM_REASONING_EFFORT=${LLM_REASONING_EFFORT}"
     fi
 
+    # Only pass SYSTEM_PWD to Docker if it is set/non-empty, with proper escaping
+    SYSTEM_PWD_ARG=""
+    if [[ -n "$SYSTEM_PWD" ]]; then
+        escaped_pwd=$(printf '%q' "$SYSTEM_PWD")
+        SYSTEM_PWD_ARG="-e SYSTEM_PWD=$escaped_pwd"
+    fi
+
+    # Determine SANDBOX_USER_ID based on SYSTEM_PWD
+    # If SYSTEM_PWD is provided, we run as root (UID 0) inside the container
+    # This enables sudo operations within the container using the provided password
+    # If SYSTEM_PWD is not provided, we run as the current host user (non-root)
+    # This follows the principle of least privilege for better security when root access isn't needed
+    if [[ -n "$SYSTEM_PWD" ]]; then
+        SANDBOX_USER_ID="0"
+    else
+        SANDBOX_USER_ID="$(id -u)"
+    fi
+
     # Set default LOG_LEVEL if not specified, then pass to Docker
     : "${LOG_LEVEL:=DEBUG}"
     LOG_LEVEL_ARG="-e LOG_LEVEL=${LOG_LEVEL}"
@@ -62,7 +80,7 @@ if [ -f .env ]; then
         fi
     }
     print_var "SANDBOX_RUNTIME_CONTAINER_IMAGE" "$SANDBOX_RUNTIME_CONTAINER_IMAGE"
-    print_var "SANDBOX_USER_ID" "$(id -u)"
+    print_var "SANDBOX_USER_ID" "$SANDBOX_USER_ID"
     print_var "SANDBOX_VOLUMES" "$SANDBOX_VOLUMES"
     print_var "RUNTIME_MOUNT" "$RUNTIME_MOUNT"
     print_var "WORKSPACE_MOUNT_PATH_IN_SANDBOX" "$WORKSPACE_MOUNT_PATH_IN_SANDBOX"
@@ -85,7 +103,7 @@ if [ -f .env ]; then
     # Run the Open Hands container
     docker run -it --rm --pull=always \
         $SANDBOX_RUNTIME_CONTAINER_IMAGE_ARG \
-        -e SANDBOX_USER_ID=$(id -u) \
+        -e SANDBOX_USER_ID=$SANDBOX_USER_ID \
         -e SANDBOX_VOLUMES=$SANDBOX_VOLUMES \
         -e RUNTIME_MOUNT=$RUNTIME_MOUNT \
         -e WORKSPACE_MOUNT_PATH_IN_SANDBOX=$WORKSPACE_MOUNT_PATH_IN_SANDBOX \
@@ -100,6 +118,7 @@ if [ -f .env ]; then
         $LLM_REASONING_EFFORT_ARG \
         $LOG_ALL_EVENTS_ARG \
         $LOG_LEVEL_ARG \
+        $SYSTEM_PWD_ARG \
         -e SANDBOX_PLATFORM=$SANDBOX_PLATFORM \
         -e SANDBOX_ENABLE_GPU=$SANDBOX_ENABLE_GPU \
         -e SEARCH_API_KEY=$SEARCH_API_KEY \
