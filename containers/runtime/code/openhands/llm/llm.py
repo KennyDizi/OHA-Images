@@ -89,8 +89,8 @@ FUNCTION_CALLING_SUPPORTED_MODELS = [
     'kimi-k2-0711-preview',
     'kimi-k2-instruct',
     'Qwen3-Coder-480B-A35B-Instruct',
-    'qwen/qwen3-coder',
-    'qwen/qwen3-235b-a22b-thinking-2507'
+    'qwen3-coder',  # this will match both qwen3-coder-480b (openhands provider) and qwen3-coder (for openrouter)
+    'qwen3-235b-a22b-thinking-2507'
 ]
 
 REASONING_EFFORT_SUPPORTED_MODELS = [
@@ -104,7 +104,7 @@ REASONING_EFFORT_SUPPORTED_MODELS = [
     'o4-mini-2025-04-16',
     'gemini-2.5-flash',
     'gemini-2.5-pro',
-    'qwen/qwen3-235b-a22b-thinking-2507'
+    'qwen3-235b-a22b-thinking-2507'
 ]
 
 MODELS_WITHOUT_STOP_WORDS = [
