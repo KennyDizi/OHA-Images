@@ -80,7 +80,7 @@ function oh { {{ command }} $args }
     }
 
     def __init__(
-        self, command: str = 'uvx --python 3.12 --from openhands-ai openhands'
+        self, command: str = 'uvx --python 3.13 --from openhands-ai openhands'
     ):
         """Initialize the shell config manager.
 
