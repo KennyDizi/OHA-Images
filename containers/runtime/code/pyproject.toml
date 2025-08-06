@@ -25,11 +25,11 @@ include = [
 build = "build_vscode.py" # Build VSCode extension during Poetry build
 
 [tool.poetry.dependencies]
-python = "^3.13,<3.14"
-litellm = "^1.74.15.post1"            # avoid 1.64.4 (known bug) & 1.67.* (known bug #10272)
+python = "^3.12,<3.14"
+litellm = "^1.75.0"            # avoid 1.64.4 (known bug) & 1.67.* (known bug #10272)
 aiohttp = ">=3.9.0,!=3.11.13"                      # Pin to avoid yanked version 3.11.13
 google-generativeai = "*"                          # To use litellm with Gemini Pro API
-google-api-python-client = "^2.177.0"              # For Google Sheets API
+google-api-python-client = "^2.164.0"              # For Google Sheets API
 google-auth-httplib2 = "*"                         # For Google Sheets authentication
 google-auth-oauthlib = "*"                         # For Google Sheets OAuth
 termcolor = "*"
@@ -87,7 +87,7 @@ bashlex = "^0.18"
 redis = ">=5.2,<7.0"
 
 google-cloud-aiplatform = "*"
-anthropic = "^0.60.0"
+anthropic = "^0.61.0"
 boto3 = "*"
 kubernetes = "^33.1.0"
 pyyaml = "^6.0.2"
@@ -124,7 +124,8 @@ pytest-cov = "*"
 pytest-asyncio = "*"
 pytest-forked = "*"
 pytest-xdist = "*"
-openai = "1.98.0"
+openai = ">=1.99.1"
+tiktoken = ">=0.10.0"
 pandas = "*"
 reportlab = "*"
 gevent = ">=24.2.1,<26.0.0"
