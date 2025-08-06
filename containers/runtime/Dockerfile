@@ -138,9 +138,9 @@ RUN \
     /openhands/micromamba/bin/micromamba run -n openhands poetry install --only main,runtime --no-interaction --no-root && \
     # Update and install additional tools
     # (There used to be an "apt-get update" here, hopefully we can skip it.)
-
+    
     /openhands/micromamba/bin/micromamba run -n openhands poetry run playwright install --with-deps chromium && \
-
+    
     # Set environment variables
     /openhands/micromamba/bin/micromamba run -n openhands poetry run python -c "import sys; print('OH_INTERPRETER_PATH=' + sys.executable)" >> /etc/environment && \
     # Set permissions
