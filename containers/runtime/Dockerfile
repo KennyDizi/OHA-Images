@@ -37,7 +37,7 @@ ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         wget curl ca-certificates sudo apt-utils git jq tmux build-essential ripgrep ffmpeg \
-        libgl1-mesa-glx \
+        libgl1 \
         libasound2-plugins libatomic1 \
         # Install Docker dependencies
         apt-transport-https ca-certificates curl gnupg lsb-release
