@@ -1,5 +1,7 @@
 FROM nikolaik/python-nodejs:python3.13-nodejs24-slim
 
+SHELL ["/bin/bash", "-c"]
+
 # Shared environment variables
 ENV POETRY_VIRTUALENVS_PATH=/openhands/poetry \
     MAMBA_ROOT_PREFIX=/openhands/micromamba \
@@ -60,12 +62,18 @@ RUN mkdir -p /openhands && \
 
 
 # ================================================================
+# Define Docker installation macro
+
+
+# Install Docker only if not a swebench or mswebench image
+
+
 # Install Docker following official documentation
 # https://docs.docker.com/engine/install/ubuntu/
 # https://docs.docker.com/engine/install/debian/
 RUN \
     # Determine OS type and install accordingly
-    if [[ "nikolaik/python-nodejs:python3.13-nodejs24-slim" == *"ubuntu"* ]] || [[ "nikolaik/python-nodejs:python3.13-nodejs24-slim" == *"mswebench"* ]]; then \
+    if [[ "nikolaik/python-nodejs:python3.13-nodejs24-slim" == *"ubuntu"* ]]; then \
         # Handle Ubuntu (following https://docs.docker.com/engine/install/ubuntu/)
         # Add Docker's official GPG key
         apt-get update && \
@@ -84,13 +92,8 @@ RUN \
         install -m 0755 -d /etc/apt/keyrings && \
         curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
         chmod a+r /etc/apt/keyrings/docker.asc && \
-        # Add the repository to Apt sources
-        # For Debian, if it's noble (testing/unstable), use bookworm (stable) repository
-        if [ "$(lsb_release -cs)" = "noble" ]; then \
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
-        else \
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
-        fi; \
+        # Add the repository to Apt sources (default to bookworm for stability)
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
     fi && \
     # Install Docker Engine, containerd, and Docker Compose
     apt-get update && \
@@ -101,6 +104,8 @@ RUN \
 # Configure Docker daemon with MTU 1450 to prevent packet fragmentation issues
 RUN mkdir -p /etc/docker && \
     echo '{"mtu": 1450}' > /etc/docker/daemon.json
+
+
 # ================================================================
 
 
@@ -113,7 +118,7 @@ RUN mkdir -p /openhands/micromamba/bin && \
 
 # Create the openhands virtual environment and install poetry and python
 RUN /openhands/micromamba/bin/micromamba create -n openhands -y && \
-    /openhands/micromamba/bin/micromamba install -n openhands -c conda-forge poetry python=3.13 -y
+    /openhands/micromamba/bin/micromamba install -n openhands -c conda-forge poetry python=3.12 -y
 
 # Create a clean openhands directory including only the pyproject.toml, poetry.lock and openhands/__init__.py
 RUN \
@@ -133,14 +138,12 @@ WORKDIR /openhands/code
 RUN \
     /openhands/micromamba/bin/micromamba config set changeps1 False && \
     /openhands/micromamba/bin/micromamba run -n openhands poetry config virtualenvs.path /openhands/poetry && \
-    /openhands/micromamba/bin/micromamba run -n openhands poetry env use python3.13 && \
+    /openhands/micromamba/bin/micromamba run -n openhands poetry env use python3.12 && \
     # Install project dependencies
     /openhands/micromamba/bin/micromamba run -n openhands poetry install --only main,runtime --no-interaction --no-root && \
     # Update and install additional tools
     # (There used to be an "apt-get update" here, hopefully we can skip it.)
-    
     /openhands/micromamba/bin/micromamba run -n openhands poetry run playwright install --with-deps chromium && \
-    
     # Set environment variables
     /openhands/micromamba/bin/micromamba run -n openhands poetry run python -c "import sys; print('OH_INTERPRETER_PATH=' + sys.executable)" >> /etc/environment && \
     # Set permissions
@@ -198,7 +201,8 @@ RUN if [ -z "${RELEASE_TAG}" ]; then \
 # ================================================================
 RUN if [ -d /openhands/code/openhands ]; then rm -rf /openhands/code/openhands; fi
 COPY ./code/pyproject.toml ./code/poetry.lock /openhands/code/
-
+RUN if [ -d /openhands/code/microagents ]; then rm -rf /openhands/code/microagents; fi
+COPY ./code/microagents /openhands/code/microagents
 COPY ./code/openhands /openhands/code/openhands
 RUN chmod a+rwx /openhands/code/openhands/__init__.py
 
