@@ -280,6 +280,11 @@ def prep_build_folder(
         ),
     )
 
+    # Copy the 'microagents' directory (Microagents)
+    shutil.copytree(
+        Path(project_root, 'microagents'), Path(build_folder, 'code', 'microagents')
+    )
+
     # Copy pyproject.toml and poetry.lock files
     for file in ['pyproject.toml', 'poetry.lock']:
         src = Path(openhands_source_dir, file)
@@ -387,7 +392,7 @@ def _build_sandbox_image(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--base_image', type=str, default='nikolaik/python-nodejs:python3.13-nodejs24-slim'
+        '--base_image', type=str, default='nikolaik/python-nodejs:python3.12-nodejs22'
     )
     parser.add_argument('--build_folder', type=str, default=None)
     parser.add_argument('--force_rebuild', action='store_true', default=False)
